@@ -12,3 +12,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  data:
+    web:
+      pageable:
+        page-parameter: pagina
+        size-parameter: tamanho
+      sort:
+        sort-parameter: ordem
