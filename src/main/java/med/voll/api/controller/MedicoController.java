@@ -40,4 +40,11 @@ public class MedicoController {
         return new DadosPaginacaoGeneric<>(page);
     }
 
+    @PutMapping
+    @Transactional
+    public void atualizar(@RequestBody @Valid DadosAtualizacaoMedico dados){
+        var medico = repository.getReferenceById(dados.id());
+        medico.atualizarInformacoes(dados);
+    }
+
 }
