@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import med.voll.api.services.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("medicos")
@@ -20,49 +22,60 @@ public class MedicoController {
 
     @PostMapping
     @Transactional
-    public void cadastrarMedicos(@RequestBody @Valid DadosCadastroMedicos dados){
-        repository.save(new Medico(dados));
+    public ResponseEntity cadastrarMedicos(@RequestBody @Valid DadosCadastroMedicos dados, UriComponentsBuilder uriBuilder){
+        var medico = new Medico(dados);
+        repository.save(medico);
+
+        var uri = uriBuilder.path("medicos/{id}").buildAndExpand(medico.getId()).toUri();
+
+        return ResponseEntity.created(uri).body(new DadosDetalhamentoMedico(medico));
     }
 
     //Listagem paginada, porém sem os metadados da consulta (numeroPagina, tamanhoPagina, totalResultados e totalPaginas)
     //Por padrão retorna uma página de tamanho 10 e ordena pela propriedade "nome", mas pode ser alterado nos Query Params
     @GetMapping
-    public List<DadosListagemTodosMedicos> listar(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao) {
-        return repository.findAll(paginacao).stream().map(DadosListagemTodosMedicos::new).toList();
+    public ResponseEntity<List<DadosListagemTodosMedicos>> listar(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao) {
+        var resposta = repository.findAll(paginacao).stream().map(DadosListagemTodosMedicos::new).toList();
+        return ResponseEntity.ok(resposta);
     }
 
     //Listagem paginada, com a mesma funcionalidade de paginação acima, mas também com retorno personalizado de paginação (objetos DTO: resultado e paginacao)
     //Por padrão retorna uma página de tamanho 10 e ordena pela propriedade "nome", mas pode ser alterado nos Query Params
     @GetMapping("paginando")
-    public DadosPaginacaoGeneric<DadosListagemMedicosAtivos> listarPaginando(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao){
+    public ResponseEntity<DadosPaginacaoGeneric<DadosListagemMedicosAtivos>> listarPaginando(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao){
         Page<DadosListagemMedicosAtivos> page = repository.findAllByAtivoTrue(paginacao).map(DadosListagemMedicosAtivos::new);
-        return new DadosPaginacaoGeneric<>(page);
+        return ResponseEntity.ok(new DadosPaginacaoGeneric<>(page));
     }
 
     @PutMapping
     @Transactional
-    public void atualizar(@RequestBody @Valid DadosAtualizacaoMedico dados){
+    public ResponseEntity atualizar(@RequestBody @Valid DadosAtualizacaoMedico dados){
         var medico = repository.getReferenceById(dados.id());
         medico.atualizarInformacoes(dados);
+        return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
     }
 
-    @DeleteMapping("{id}")
+    @PutMapping("inativar/{id}")
     @Transactional
-    public void excluir(@PathVariable Long id){
-        repository.deleteById(id);
-    }
-
-    @DeleteMapping("inativar/{id}")
-    @Transactional
-    public void inativar(@PathVariable Long id){
+    public ResponseEntity inativar(@PathVariable Long id){
         var medico = repository.getReferenceById(id);
         medico.inativar();
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("ativar/{id}")
     @Transactional
-    public void ativar(@PathVariable Long id){
+    public ResponseEntity ativar(@PathVariable Long id){
         var medico = repository.getReferenceById(id);
         medico.ativar();
+        return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("{id}")
+    @Transactional
+    public ResponseEntity excluir(@PathVariable Long id){
+        repository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
