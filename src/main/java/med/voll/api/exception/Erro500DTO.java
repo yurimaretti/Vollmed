@@ -1,13 +1,12 @@
 package med.voll.api.exception;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
-public record ValidationErrorResponse(
+public record Erro500DTO(
         LocalDateTime timestamp,
         int status,
-        String error,
+        String erro,
         String path,
-        Map<String, String> fieldErrors
-) {}
-
+        String menssagem
+) {
+}
