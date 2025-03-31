@@ -47,6 +47,13 @@ public class MedicoController {
         return ResponseEntity.ok(new DadosPaginacaoGeneric<>(page));
     }
 
+    //Consulta 1 médico específico pelo ID
+    @GetMapping("{id}")
+    public ResponseEntity consultar(@PathVariable Long id){
+        var medico = repository.getReferenceById(id);
+        return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
+    }
+
     @PutMapping
     @Transactional
     public ResponseEntity atualizar(@RequestBody @Valid DadosAtualizacaoMedico dados){
