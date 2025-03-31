@@ -27,16 +27,15 @@ public class MedicoController {
     //Listagem paginada, porém sem os metadados da consulta (numeroPagina, tamanhoPagina, totalResultados e totalPaginas)
     //Por padrão retorna uma página de tamanho 10 e ordena pela propriedade "nome", mas pode ser alterado nos Query Params
     @GetMapping
-    public List<DadosListagemMedico> listar(@PageableDefault(size = 10, sort = {"nome"}) Pageable pageable) {
-        return repository.findAll(pageable).stream().map(DadosListagemMedico::new).toList();
+    public List<DadosListagemTodosMedicos> listar(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao) {
+        return repository.findAll(paginacao).stream().map(DadosListagemTodosMedicos::new).toList();
     }
 
     //Listagem paginada, com a mesma funcionalidade de paginação acima, mas também com retorno personalizado de paginação (objetos DTO: resultado e paginacao)
     //Por padrão retorna uma página de tamanho 10 e ordena pela propriedade "nome", mas pode ser alterado nos Query Params
     @GetMapping("paginando")
-    public DadosPaginacaoGeneric<DadosListagemMedico> listarPaginando(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao){
-        Page<DadosListagemMedico> page = repository.findAll(paginacao).map(DadosListagemMedico::new);
-
+    public DadosPaginacaoGeneric<DadosListagemMedicosAtivos> listarPaginando(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao){
+        Page<DadosListagemMedicosAtivos> page = repository.findAllByAtivoTrue(paginacao).map(DadosListagemMedicosAtivos::new);
         return new DadosPaginacaoGeneric<>(page);
     }
 
@@ -53,4 +52,17 @@ public class MedicoController {
         repository.deleteById(id);
     }
 
+    @DeleteMapping("inativar/{id}")
+    @Transactional
+    public void inativar(@PathVariable Long id){
+        var medico = repository.getReferenceById(id);
+        medico.inativar();
+    }
+
+    @PutMapping("ativar/{id}")
+    @Transactional
+    public void ativar(@PathVariable Long id){
+        var medico = repository.getReferenceById(id);
+        medico.ativar();
+    }
 }
