@@ -39,6 +39,22 @@ public class TratamentoDeErros {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @ExceptionHandler(ValidacaoException.class)
+    public ResponseEntity<ErroRegraDeNegocioDTO> tratamentoErroRegraNegocio(
+            ValidacaoException ex,
+            HttpServletRequest request
+    ){
+        ErroRegraDeNegocioDTO response = new ErroRegraDeNegocioDTO(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Erro de validação",
+                request.getRequestURI(),
+                ex.getMessage()
+        );
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Erro500DTO> tratamentoErroIntegridade(
             DataIntegrityViolationException ex,
