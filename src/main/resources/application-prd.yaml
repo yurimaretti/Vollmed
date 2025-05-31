@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:sqlserver://${DB_HOST_PRD}:${DB_PORT_PRD};databaseName=${DB_NAME_PRD};encrypt=true;trustServerCertificate=true
+    username: ${DB_USERNAME_PRD}
+    password: ${DB_PASSWORD_PRD}
+
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false

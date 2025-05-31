@@ -1,3 +1,5 @@
 spring:
   datasource:
     url: jdbc:sqlserver://${DB_HOST}:${DB_PORT};databaseName=${DB_TEST_NAME};encrypt=true;trustServerCertificate=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
